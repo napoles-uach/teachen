@@ -4,6 +4,17 @@ import openai
 # OpenAI API key from Streamlit secrets
 openai.api_key = st.secrets["gpt_key"]
 
+def openq(prompt_script):
+    completion = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"Answer the following question as accurately as possible, try to help as much as you can with this, but be brief and concise. Use markdown format. {prompt_script}"}
+        ],
+        max_tokens=1000
+    )
+    return completion.choices[0].message.content
+
 def evaluate_english_level(answers):
     prompt_script = (
         "Evaluate the following answers to determine the English proficiency level "
@@ -14,15 +25,7 @@ def evaluate_english_level(answers):
     
     prompt_script += "\nProvide the overall proficiency level:"
 
-    completion = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are an English proficiency evaluator."},
-            {"role": "user", "content": prompt_script}
-        ],
-        max_tokens=100
-    )
-    return completion.choices[0].message.content.strip()
+    return openq(prompt_script).strip()
 
 # Title and description
 st.title("Learn English with AI")
