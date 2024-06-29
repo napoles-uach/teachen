@@ -1,17 +1,20 @@
 import streamlit as st
 import openai
 
-# Set your OpenAI API key here
-openai.api_key = "your_openai_api_key"
+# OpenAI API key from Streamlit secrets
+openai.api_key = st.secrets["gpt_key"]
 
-def get_feedback(sentence):
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=f"Provide feedback on the following English sentence:\n\n{sentence}\n\nFeedback:",
-        max_tokens=50
+def openq(prompt_script):
+    client = openai
+    completion = client.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"Answer the following question as accurately as possible, try to help as much as you can with this, but be brief and concise. Use markdown format. {prompt_script} "}
+        ],
+        max_tokens=1000
     )
-    feedback = response.choices[0].text.strip()
-    return feedback
+    return completion.choices[0].message.content
 
 # Title and description
 st.title("Learn English with AI")
@@ -52,7 +55,7 @@ st.write("Write your own sentence and get feedback from AI.")
 
 user_sentence = st.text_area("Your sentence", "")
 if user_sentence:
-    feedback = get_feedback(user_sentence)
+    feedback = openq(f"Provide feedback on the following English sentence: {user_sentence}")
     st.write("Your sentence:")
     st.write(user_sentence)
     st.write("AI Feedback:")
