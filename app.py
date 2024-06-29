@@ -5,27 +5,21 @@ import openai
 openai.api_key = st.secrets["gpt_key"]
 
 def openq(prompt_script):
-    completion = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"Answer the following question as accurately as possible, try to help as much as you can with this, but be brief and concise. Use markdown format. {prompt_script}"}
-        ],
-        max_tokens=1000
+    response = openai.Completion.create(
+        engine="gpt-4",
+        prompt=f"Evaluate the following answers to determine the English proficiency level (Beginner, Intermediate, Advanced):\n{prompt_script}\nProvide the overall proficiency level:",
+        max_tokens=100,
+        n=1,
+        stop=None,
+        temperature=0.5,
     )
-    return completion.choices[0].message.content
+    return response.choices[0].text.strip()
 
 def evaluate_english_level(answers):
-    prompt_script = (
-        "Evaluate the following answers to determine the English proficiency level "
-        "(Beginner, Intermediate, Advanced):\n"
-    )
+    prompt_script = ""
     for idx, answer in enumerate(answers, start=1):
         prompt_script += f"Question {idx}: {answer}\n"
-    
-    prompt_script += "\nProvide the overall proficiency level:"
-
-    return openq(prompt_script).strip()
+    return openq(prompt_script)
 
 # Title and description
 st.title("Learn English with AI")
