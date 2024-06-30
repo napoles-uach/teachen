@@ -1,15 +1,13 @@
 import streamlit as st
 import openai
+from openai import OpenAI
 
-# Setting up OpenAI client with the API key from Streamlit secrets
+# OpenAI API key from Streamlit secrets
 openai.api_key = st.secrets["gpt_key"]
 
-def evaluate_english_level(answers):
-    """ Sends English proficiency evaluation requests to OpenAI's model """
-    prompt_script = ""
-    for idx, answer in enumerate(answers, start=1):
-        prompt_script += f"Question {idx}: {answer}\n"
-    response = openai.ChatCompletion.create(
+def openq(prompt_script):
+    client = openai.OpenAI(api_key=st.secrets["gpt_key"])
+    completion = client.chat_completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
@@ -17,7 +15,13 @@ def evaluate_english_level(answers):
         ],
         max_tokens=1000
     )
-    return response['choices'][0]['message']['content']
+    return completion.choices[0].message['content']
+
+def evaluate_english_level(answers):
+    prompt_script = ""
+    for idx, answer in enumerate(answers, start=1):
+        prompt_script += f"Question {idx}: {answer}\n"
+    return openq(prompt_script)
 
 # App title and description
 st.title("Learn English with AI")
@@ -72,3 +76,4 @@ if 'proficiency_level' in st.session_state:
 
 # Footer
 st.write("Keep practicing every day to improve your English skills!")
+
