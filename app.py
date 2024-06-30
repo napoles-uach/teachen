@@ -4,16 +4,21 @@ import openai
 # OpenAI API key from Streamlit secrets
 openai.api_key = st.secrets["gpt_key"]
 
+
 def openq(prompt_script):
-    response = openai.Completion.create(
-        engine="gpt-4",
-        prompt=f"Evaluate the following answers to determine the English proficiency level (Beginner, Intermediate, Advanced):\n{prompt_script}\nProvide the overall proficiency level:",
-        max_tokens=100,
-        n=1,
-        stop=None,
-        temperature=0.5,
+    client = OpenAI(api_key=st.secrets["gpt_key"])
+    completion = client.chat.completions.create(
+       # model = "gpt-3.5-turbo-0125",
+       # model="gpt-4-turbo-2024-04-09",
+      model="gpt-4o",
+      #model="gpt-3.5-turbo-1106",
+      messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": f"Evaluate the following answers to determine the English proficiency level (Beginner, Intermediate, Advanced):\n{prompt_script}\nProvide the overall proficiency level:"}
+      ],
+      max_tokens=1000
     )
-    return response.choices[0].text.strip()
+    return completion.choices[0].message.content
 
 def evaluate_english_level(answers):
     prompt_script = ""
